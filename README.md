@@ -77,7 +77,7 @@ document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 }
 
-const API_KEY="ISI_API_KEY_KAMU";
+const API_KEY="3d2c930b1ae931073c5fb6110d56f22d";
 
 fetch("https://api-football-v1.p.rapidapi.com/v3/fixtures?live=all",{
 headers:{
