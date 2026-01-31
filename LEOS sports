@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>LEOS Sports | Sepakbola Eropa 2026</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{margin:0;font-family:Arial;background:#0b0b0b;color:#fff}
+header{background:#111;padding:15px;position:sticky;top:0}
+header h1{margin:0;color:#00ffcc}
+nav{margin-top:10px}
+nav select, nav button{background:none;border:none;color:#fff;margin-right:12px;font-size:14px}
+nav select{padding:2px 6px}
+nav button:hover, nav select:hover{color:#00ffcc}
+section{display:none;padding:15px}
+section.active{display:block}
+.card{background:#1a1a1a;padding:10px;margin-bottom:8px;border-radius:6px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:6px;text-align:left;border-bottom:1px solid #333}
+footer{text-align:center;font-size:12px;color:#aaa;padding:15px}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>LEOS Sports</h1>
+<nav>
+<button onclick="show('home')">Home</button>
+<button onclick="show('live')">Live</button>
+<button onclick="show('standings')">Klasemen</button>
+<button onclick="show('fixtures')">Jadwal</button>
+<button onclick="show('news')">Berita</button>
+<select id="leagueSelect" onchange="changeLeague(this.value)">
+<option value="39">Premier League (Inggris)</option>
+<option value="140">La Liga (Spanyol)</option>
+<option value="135">Serie A (Italia)</option>
+<option value="78">Bundesliga (Jerman)</option>
+<option value="61">Ligue 1 (Prancis)</option>
+</select>
+</nav>
+</header>
+
+<section id="home" class="active">
+<div class="card">
+<h3>Portal Sepakbola Eropa 2026</h3>
+<p>Fokus utama Eropa, dengan update live score, klasemen, dan jadwal pertandingan.</p>
+</div>
+</section>
+
+<section id="live">
+<h3>Live Score</h3>
+<div id="liveData">Memuat...</div>
+</section>
+
+<section id="standings">
+<h3>Klasemen</h3>
+<table id="table">
+<tr><th>#</th><th>Tim</th><th>Main</th><th>Poin</th></tr>
+</table>
+</section>
+
+<section id="fixtures">
+<h3>Jadwal Pertandingan</h3>
+<div id="fixturesData">Memuat...</div>
+</section>
+
+<section id="news">
+<h3>Berita Sepakbola</h3>
+<div class="card">Musim 2026 Eropa semakin kompetitif.</div>
+<div class="card">Transfer pemain besar menghiasi bursa musim panas.</div>
+<div class="card">Liga 1 Indonesia tetap berkembang meski fokus Eropa.</div>
+</section>
+
+<footer>© 2026 LEOS Sports</footer>
+
+<script>
+function show(id){
+document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
+
+const API_KEY="3d2c930b1ae931073c5fb6110d56f22d";
+const HOST="api-football-v1.p.rapidapi.com";
+let selectedLeague = 39;
+let season = 2025;
+
+function changeLeague(id){
+selectedLeague = id;
+loadStandings();
+loadFixtures();
+}
+
+function loadLive(){
+fetch("https://"+HOST+"/v3/fixtures?live=all",{
+headers:{"X-RapidAPI-Key":API_KEY,"X-RapidAPI-Host":HOST}
+})
+.then(r=>r.json())
+.then(d=>{
+let h="";
+(d.response||[]).slice(0,8).forEach(m=>{
+h+=`<div class="card">
+${m.league.name}<br>
+${m.teams.home.name} <b>${m.goals.home}-${m.goals.away}</b> ${m.teams.away.name}
+</div>`;
+});
+document.getElementById("liveData").innerHTML=h||"Tidak ada live.";
+});
+}
+
+function loadStandings(){
+fetch("https://"+HOST+"/v3/standings?league="+selectedLeague+"&season="+season,{
+headers:{"X-RapidAPI-Key":API_KEY,"X-RapidAPI-Host":HOST}
+})
+.then(r=>r.json())
+.then(d=>{
+let rows=d.response[0].league.standings[0];
+let html="";
+rows.forEach(t=>{
+html+=`<tr>
+<td>${t.rank}</td>
+<td>${t.team.name}</td>
+<td>${t.all.played}</td>
+<td>${t.points}</td>
+</tr>`;
+});
+document.getElementById("table").innerHTML=`<tr><th>#</th><th>Tim</th><th>Main</th><th>Poin</th></tr>`+html;
+});
+}
+
+function loadFixtures(){
+fetch("https://"+HOST+"/v3/fixtures?league="+selectedLeague+"&season="+season+"&next=5",{
+headers:{"X-RapidAPI-Key":API_KEY,"X-RapidAPI-Host":HOST}
+})
+.then(r=>r.json())
+.then(d=>{
+let h="";
+(d.response||[]).forEach(m=>{
+h+=`<div class="card">
+${m.teams.home.name} vs ${m.teams.away.name}<br>
+${new Date(m.fixture.date).toLocaleString()}
+</div>`;
+});
+document.getElementById("fixturesData").innerHTML=h;
+});
+}
+
+// Load awal
+loadLive();
+loadStandings();
+loadFixtures();
+
+</script>
+
+</body>
+</html>
